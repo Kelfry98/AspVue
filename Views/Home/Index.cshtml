@@ -1,0 +1,101 @@
+﻿
+<main>
+    <br /><br />
+          <div>
+              <input type="text" class="form-control" placeholder="Nombre" v-model="form.name" name="name" value="" />
+              <br />
+              <input type="text" class="form-control"  v-model="form.lastName" name="lastName" value="" />
+          </div>
+    <br />
+    <button class="btn btn-success" v-if="btn == false" v-on:click="send()">Guardar</button>
+    <button class="btn btn-info" v-else v-on:click="update()">Actualizar</button>
+    <button class="btn btn-danger" v-show="btn == true" v-on:click="btntrue()">Cancelar</button>
+
+
+    <br />
+    <br />
+    <div class="row">
+        <div class="col">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Nombre</th>
+                        <th scope="col">Apellido</th>
+             
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="person in persons">
+                        <th scope="row">{{person.id}}</th>
+                        <td>{{person.name}}</td>
+                        <th>{{person.lastName}}</th>
+                        <th>
+                            <a class="btn btn-danger" v-on:click="remove(person.id)">Eliminar</a>
+                            <button class="btn btn-info" v-on:click="get(person.id)">Actualizar</button>
+                        </th>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+<script>
+    new Vue({
+        el: 'main',
+        data: {
+  
+            persons: [],
+            btn: false,
+            form: {
+                id : 0,
+                name: null,
+                lastName: null,
+               
+            }
+        },
+        created() {
+            this.getAll();
+        },
+        methods: {
+            send() {
+                axios.post('https://localhost:44327/Home/Add', this.form).then(r => {
+                    this.getAll();
+                }).catch(e => { console.log(e) })
+            },
+            getAll() {
+                axios.get('https://localhost:44327/Home/Getall').then(r => {
+                    this.persons = r.data;
+                }).catch(e => { console.log(e) })
+
+            },
+            remove(id) {
+                axios.delete(`https://localhost:44327/Home/Remove/` + id)
+                    .then(r => {
+                        this.getAll();
+                    }).catch(e => {
+                        console.log(e)
+                    })
+            },
+            btntrue() {
+                this.btn = false;
+                this.form.name = null;
+                this.form.lastName = null;
+                this.form.id = null;
+            },
+            get(id) {
+                axios.get(`https://localhost:44327/Home/Get/` + id).then(r => {
+                    this.form.name = r.data.name;
+                    this.form.lastName = r.data.lastName;
+                    this.form.id = r.data.id;
+                    this.btn = true;
+                }).catch(e => { console.log(e) })
+            },
+            update() {
+                axios.put('https://localhost:44327/Home/Update', this.form).then(r => {
+                    this.getAll();
+                }).catch(e => { console.log(e) })
+            }
+        }
+    })
+</script>
